@@ -2,8 +2,8 @@
 # https://github.com/Hyy2001X/AutoBuild-Actions
 # AutoBuild Module by Hyy2001
 
-rm -f /tmp/cloud_version
-rm -f /tmp/Version_Tags
+#rm -f /tmp/cloud_version
+#rm -f /tmp/Version_Tags
 if [[ -f /bin/openwrt_info ]]; then
 	chmod +x /bin/openwrt_info
 	bash /bin/AutoUpdate.sh	-w
