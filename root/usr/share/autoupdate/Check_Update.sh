@@ -11,8 +11,9 @@ else
 	echo "未检测到定时更新插件所需程序" > /tmp/cloud_version
 	exit 1
 fi
-[[ ! -f /tmp/Version_Tags ]] && echo "因网络原因,未能检测到云端版本,请检查网络或您需要翻墙,或您修改的Github地址有错误,或再次刷新网页试试!" > /tmp/cloud_version && exit 1
+[[ ! -f /tmp/Version_Tags ]] && echo "未检测到云端版本,请检查网络,或您的仓库为私库,或您修改的Github地址有错误,或发布已被删除,或再次刷新网页试试!" > /tmp/cloud_version && exit 1
 source /tmp/Version_Tags
+chmod +x /tmp/Version_Tags
 if [[ ! -z "${CLOUD_Version}" ]];then
 	if [[ "${CURRENT_Version}" -eq "${CLOUD_Version}" ]];then
 		Checked_Type="已是最新"
