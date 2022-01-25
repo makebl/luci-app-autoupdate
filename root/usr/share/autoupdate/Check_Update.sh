@@ -2,31 +2,29 @@
 # https://github.com/Hyy2001X/AutoBuild-Actions
 # AutoBuild Module by Hyy2001
 
-rm -f /tmp/cloud_*_version
-if [ ! -f /bin/AutoUpdate.sh ];then
-	echo "未检测到 /bin/AutoUpdate.sh" > /tmp/cloud_nightly_version
-	echo "未检测到 /bin/AutoUpdate.sh" > /tmp/cloud_stable_version
-	exit
-fi
-CURRENT_DEVICE="$(jsonfilter -e '@.model.id' < "/etc/board.json" | tr ',' '_')"
-Github="$(awk 'NR==2' /etc/openwrt_info)"
-[[ -z "${Github}" ]] && exit
-Author="${Github##*com/}"
-Github_Tags="https://api.github.com/repos/${Author}/releases/latest"
-wget -q ${Github_Tags} -O - > /tmp/Github_Tags
-GET_Nightly_Version="$(cat /tmp/Github_Tags | egrep -o "AutoBuild-phicomm-R[0-9]+.[0-9]+.[0-9]+.[0-9]+.[a-z]" | awk 'END {print}' | egrep -o 'R[0-9]+.[0-9]+.[0-9]+.[0-9]+')"
-GET_Stable_Version="$(cat /tmp/Github_Tags | egrep -o "AutoBuild-phicomm-R[0-9]+.[0-9]+.[0-9]+.[0-9]+-Stable.[a-z]" | awk 'END {print}' | egrep -o 'R[0-9]+.[0-9]+.[0-9]+.[0-9]+-Stable')"
-[[ -z "${GET_Stable_Version}" ]] && GET_Stable_Version="未知"
-echo "${GET_Stable_Version}" > /tmp/cloud_stable_version
-CURRENT_Version="$(awk 'NR==1' /etc/openwrt_info)"
-if [ ! -z "${GET_Nightly_Version}" ];then
-	if [[ "${CURRENT_Version}" == "${GET_Nightly_Version}" ]];then
-		Checked_Type="已是最新"
-	else
-		Checked_Type="可更新"
-	fi
-	echo "${GET_Nightly_Version} [${Checked_Type}]" > /tmp/cloud_nightly_version
+rm -f /tmp/cloud_version
+rm -f /tmp/Version_Tags
+if [[ -f /bin/openwrt_info ]]; then
+	chmod +x /bin/openwrt_info
+	bash /bin/AutoUpdate.sh	-w
 else
-	echo "未知" > /tmp/cloud_nightly_version
+	echo "未检测到定时更新插件所需程序" > /tmp/cloud_version
+	exit 1
 fi
-exit
+[[ ! -f /tmp/Version_Tags ]] && echo "因网络原因,未能检测到云端版本,请检查网络或您需要翻墙,或您修改的Github地址有错误,或再次刷新网页试试!" > /tmp/cloud_version && exit 1
+source /tmp/Version_Tags
+if [[ ! -z "${CLOUD_Version}" ]];then
+	if [[ "${CURRENT_Version}" -eq "${CLOUD_Version}" ]];then
+		Checked_Type="已是最新"
+		echo "${CLOUD_Version} [${Checked_Type}]" > /tmp/cloud_version
+	elif [[ "${CURRENT_Version}" -gt "${CLOUD_Version}" ]];then
+		Checked_Type="发现更新"
+		echo "${CLOUD_Version} [${Checked_Type}]" > /tmp/cloud_version
+	elif [[ "${CURRENT_Version}" -lt "${CLOUD_Version}" ]];then
+		Checked_Type="云端最高版本,低于您现在的版本"
+		echo "${CLOUD_Version} [${Checked_Type}]" > /tmp/cloud_version	
+	fi
+else
+	echo "没检测到云端固件，您可能把云端固件删除了，或格式不对称，比如爱快虚拟机安装EIF格式都会变成Legacy引导!" > /tmp/cloud_version
+fi
+exit 0
