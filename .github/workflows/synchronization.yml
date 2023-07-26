@@ -54,4 +54,4 @@ jobs:
         cd shangyou
         git add .
         git commit -m "up"
-        git push --quiet "https://${{ secrets.REPO_TOKEN }}@github.com/${{github.repository}}" HEAD:lang
+        git push --quiet "https://${{ secrets.REPO_TOKEN }}@github.com/${{github.repository}}" HEAD:main
