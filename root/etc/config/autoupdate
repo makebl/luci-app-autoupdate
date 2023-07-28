@@ -4,4 +4,3 @@ config login
 	option week '7'
 	option hour '23'
 	option minute '0'
-
